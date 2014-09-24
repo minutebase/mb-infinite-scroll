@@ -1,3 +1,36 @@
-<h2 id='title'>Welcome to Ember.js</h2>
+<h2>Ember Infinite Scroll</h2>
 
-{{outlet}}
+<div class="example">
+  <h3>Bidirectional</h3>
+
+  {{#infinite-scroll
+    onLoadNext="loadNextBidirectional"
+    onLoadPrev="loadPrevBidirectional"
+    isLoadingPrev=isLoadingPrev
+    isLoadingNext=isLoadingNext
+    itemClass="infinite-scroll__item"
+    topItem=topItem
+  }}
+
+    {{#if isLoadingPrev}}
+      <div class="infinite-scroll__loading-indicator">
+        Loading Previous Items
+      </div>
+    {{/if}}
+
+    <ul class="infinite-scroll__list">
+      {{#each item in bidirectionalItems itemView="item"}}
+        {{item.title}}
+      {{/each}}
+    </ul>
+
+    {{#if isLoadingNext}}
+      <div class="infinite-scroll__loading-indicator">
+        Loading Next Items
+      </div>
+    {{/if}}
+
+  {{/infinite-scroll}}
+
+  <p>Top: {{topItem.title}}</p>
+</div>

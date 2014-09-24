@@ -1,6 +1,6 @@
-# Ember-infinite-scroll
+# ember-infinite-scroll
 
-This README outlines the details of collaborating on this Ember addon.
+WiP
 
 ## Installation
 

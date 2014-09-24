@@ -1,7 +1,7 @@
 {
-  "name": "dummy",
+  "name": "ember-infinite-scroll",
+  "description": "bi-directional infinite scroll addon for Ember CLI apps",
   "version": "0.0.0",
-  "private": true,
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +11,14 @@
     "build": "ember build",
     "test": "ember test"
   },
-  "repository": "https://github.com/stefanpenner/ember-cli",
+  "repository": "https://github.com/minutebase/ember-infinite-scroll",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": {
+    "name": "Richard Livsey",
+    "email": "richard@minutebase.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "body-parser": "^1.2.0",
