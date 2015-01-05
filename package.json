@@ -1,5 +1,5 @@
 {
-  "name": "ember-infinite-scroll",
+  "name": "mb-infinite-scroll",
   "description": "bi-directional infinite scroll addon for Ember CLI apps",
   "version": "0.0.0",
   "directories": {
@@ -11,7 +11,7 @@
     "build": "ember build",
     "test": "ember test"
   },
-  "repository": "https://github.com/minutebase/ember-infinite-scroll",
+  "repository": "https://github.com/minutebase/mb-infinite-scroll",
   "engines": {
     "node": ">= 0.10.0"
   },

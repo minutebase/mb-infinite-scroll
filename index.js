@@ -1,3 +1,3 @@
 module.exports = {
-  name: 'ember-infinite-scroll'
+  name: 'mb-infinite-scroll'
 };

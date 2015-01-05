@@ -1,4 +1,4 @@
-# ember-infinite-scroll
+# mb-infinite-scroll
 
 WiP
 
