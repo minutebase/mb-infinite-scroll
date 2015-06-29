@@ -27,28 +27,28 @@ export default Ember.Component.extend({
   topScrollBuffer:    null,
   bottomScrollBuffer: null,
 
-  topBufferStyle: function() {
+  topBufferStyle: Ember.computed("topScrollBuffer", function() {
     var buffer = this.get("topScrollBuffer");
     if (this.get("canScrollUp") && buffer) {
       return "height: " + buffer + "px";
     }
-  }.property("topScrollBuffer"),
+  }),
 
-  bottomBufferStyle: function() {
+  bottomBufferStyle: Ember.computed("bottomScrollBuffer", function() {
     var buffer = this.get("bottomScrollBuffer");
     if (this.get("canScrollDown") && buffer) {
       return "height: " + buffer + "px";
     }
-  }.property("bottomScrollBuffer"),
+  }),
 
-  setupBuffersAndScrollToTop: function() {
+  setupBuffersAndScrollToTop: Ember.on("didInsertElement", function() {
     var buffer = this.get("scrollBuffer");
 
     this.set("topScrollBuffer",    buffer);
     this.set("bottomScrollBuffer", this.get("scrollContainer").height() / 2); // ensure there's always space to scroll regardless of content
 
     Ember.run.schedule("afterRender", this, this.scrollToTop);
-  }.on("didInsertElement"),
+  }),
 
   scrollToTop: function() {
     if (this.get("_state") !== "inDOM") {
@@ -221,16 +221,16 @@ export default Ember.Component.extend({
     }
   },
 
-  scrollContainer: function() {
+  scrollContainer: Ember.computed("scroll-container", function() {
     var container = this.get("scroll-container");
     if (container) {
       return this.$().closest(container);
     } else {
       return Ember.$(window);
     }
-  }.property("scroll-container"),
+  }),
 
-  setupScrollHandler: function() {
+  setupScrollHandler: Ember.on("didInsertElement", function() {
     var _this = this;
     this.scrollHandler = function scrollHandler() {
       Ember.run.debounce(_this, 'scrolled', 10);
@@ -240,17 +240,21 @@ export default Ember.Component.extend({
       _this.checkOverscroll(e);
     };
 
-    this.get("scrollContainer").on("touchmove scroll", this.scrollHandler);
+    Ember.on("touchmove scroll", this.scrollHandler, this.get("scrollContainer"));
     if (this.get("prevent-overscroll")) {
-      this.get("scrollContainer").on("DOMMouseScroll mousewheel", this.checkOverscrollHandler);
+      Ember.on(
+        "DOMMouseScroll mousewheel",
+        this.checkOverscrollHandler,
+        this.get("scrollContainer")
+      );
     }
-  }.on("didInsertElement"),
+  }),
 
-  removeScrollHandler: function() {
+  removeScrollHandler: Ember.on("willDestroyElement", function() {
     this.get("scrollContainer").off("touchmove scroll", this.scrollHandler);
     if (this.get("prevent-overscroll")) {
       this.get("scrollContainer").off("DOMMouseScroll mousewheel", this.checkOverscrollHandler);
     }
-  }.on("willDestroyElement")
+  })
 
 });
