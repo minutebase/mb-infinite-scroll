@@ -5,7 +5,7 @@ export default Ember.Component.extend({
 
   isLoadingNext: false,
   isLoadingPrev: false,
-  isLoading: Ember.computed.any("isLoadingNext", "isLoadingPrev"),
+  isLoading: Ember.computed.or("isLoadingNext", "isLoadingPrev"),
 
   // if set, this is what we check for scroll events etc...
   // otherwise it's body
