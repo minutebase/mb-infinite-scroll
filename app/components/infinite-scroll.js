@@ -30,14 +30,14 @@ export default Ember.Component.extend({
   topBufferStyle: Ember.computed("topScrollBuffer", function() {
     const buffer = this.get("topScrollBuffer");
     if (this.get("canScrollUp") && buffer) {
-      return "height: " + buffer + "px";
+      return new Ember.Handlebars.SafeString("height: ${buffer}px");
     }
   }),
 
   bottomBufferStyle: Ember.computed("bottomScrollBuffer", function() {
     const buffer = this.get("bottomScrollBuffer");
     if (this.get("canScrollDown") && buffer) {
-      return "height: " + buffer + "px";
+      return new Ember.Handlebars.SafeString("height: ${buffer}px");
     }
   }),
 
