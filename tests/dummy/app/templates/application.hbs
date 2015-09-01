@@ -9,7 +9,6 @@
     isLoadingPrev=isLoadingPrev
     isLoadingNext=isLoadingNext
     itemClass="infinite-scroll__item"
-    topItem=topItem
   }}
 
     {{#if isLoadingPrev}}
@@ -19,8 +18,10 @@
     {{/if}}
 
     <ul class="infinite-scroll__list">
-      {{#each item in bidirectionalItems itemView="item"}}
-        {{item.title}}
+      {{#each bidirectionalItems as |item|}}
+        <li class="infinite-scroll__item">
+          {{item.title}}
+        </li>
       {{/each}}
     </ul>
 
@@ -31,6 +32,4 @@
     {{/if}}
 
   {{/infinite-scroll}}
-
-  <p>Top: {{topItem.title}}</p>
 </div>

@@ -1,12 +1,10 @@
 import Ember from 'ember';
 
-function generateItems(total, offset, dir) {
-  var items = [];
-  var num;
-  dir = dir || 1;
+function generateItems(total, offset, dir=1) {
+  const items = [];
 
-  for (var i=0; i<total; i++) {
-    num = ((offset || 0) + i * dir);
+  for (let i=0; i<total; i++) {
+    const num = ((offset || 0) + i * dir);
     items.push(
       Ember.Object.create({
         title: "item "+num,
@@ -14,7 +12,7 @@ function generateItems(total, offset, dir) {
       })
     );
   }
-  return items;
+  return Ember.A(items);
 }
 
 export default Ember.Route.extend({
@@ -26,19 +24,19 @@ export default Ember.Route.extend({
   actions: {
     loadNextBidirectional: function(defer) {
       Ember.run.later(this, function() {
-        var items   = this.controller.get("bidirectionalItems");
-        var lastNum = items.get("lastObject.num");
+        const items   = this.get("controller.bidirectionalItems");
+        const lastNum = items.get("lastObject.num");
         items.pushObjects(generateItems(1, lastNum + 1));
         defer.resolve();
-      }, 1000);
+      }, 250);
     },
     loadPrevBidirectional: function(defer) {
       Ember.run.later(this, function() {
-        var items   = this.controller.get("bidirectionalItems");
-        var firstNum = items.get("firstObject.num");
+        const items   = this.get("controller.bidirectionalItems");
+        const firstNum = items.get("firstObject.num");
         items.unshiftObjects(generateItems(1, firstNum - 1, -1).reverse());
         defer.resolve();
-      }, 1000);
+      }, 250);
     }
   }
 

@@ -8,7 +8,7 @@ export default Ember.Component.extend({
   isLoading: Ember.computed.or("isLoadingNext", "isLoadingPrev"),
 
   // if set, this is what we check for scroll events etc...
-  // otherwise it's body
+  // otherwise it's the element itself
   "scroll-container": null,
 
   // whether to swallow scroll events when you reach the end
@@ -21,37 +21,35 @@ export default Ember.Component.extend({
   canScrollDown: Ember.computed.notEmpty("onLoadNext"),
 
   itemClass: "infinite-scroll__item",
-  topItem:   null,
 
   scrollBuffer:       50,
   topScrollBuffer:    null,
   bottomScrollBuffer: null,
 
-  topBufferStyle: Ember.computed("topScrollBuffer", function() {
-    const buffer = this.get("topScrollBuffer");
-    let style = '';
-    if (this.get("canScrollUp") && buffer) {
-      style = "height: ${buffer}px";
-    }
-    return new Ember.Handlebars.SafeString(style);
-  }),
+  setBuffer(direction, height) {
+    this.$(`.infinite-scroll__buffer--${direction}`).css({ height });
+  },
 
-  bottomBufferStyle: Ember.computed("bottomScrollBuffer", function() {
-    const buffer = this.get("bottomScrollBuffer");
-    let style = '';
-    if (this.get("canScrollUp") && buffer) {
-      style = "height: ${buffer}px";
+  setBuffers() {
+    if (this.get("canScrollUp")) {
+      this.setBuffer("top", this.get("topScrollBuffer"));
     }
-    return new Ember.Handlebars.SafeString(style);
-  }),
+
+    if (this.get("canScrollDown")) {
+      this.setBuffer("bottom", this.get("bottomScrollBuffer"));
+    }
+  },
 
   setupBuffersAndScrollToTop: Ember.on("didInsertElement", function() {
     Ember.run.schedule("afterRender", this, () => {
       const buffer = this.get("scrollBuffer");
 
       this.set("topScrollBuffer",    buffer);
-      this.set("bottomScrollBuffer", this.get("scrollContainer").height() / 2); // ensure there's always space to scroll regardless of content
-      this.scrollToTop();
+      this.set("bottomScrollBuffer", this.get("scrollContainer").height()); // ensure there's always space to scroll regardless of content
+      this.setBuffers();
+
+      // otherwise the buffers haven't been added yet
+      Ember.run.schedule("afterRender", this, "scrollToTop");
     });
   }),
 
@@ -86,61 +84,6 @@ export default Ember.Component.extend({
     } else if (this.get("canScrollDown") && viewBottom > (contentHeight - bottomBuffer) || actualContentHeight < viewHeight) {
       this.loadNext();
     }
-
-    this.updateTopItem();
-  },
-
-  updateTopItem() {
-    // don't bother checking if nothing's listening for it
-    if (!this.get("top-item-changed")) {
-      return;
-    }
-
-    const items = this.items();
-    if (!items.length) {
-      this.set("topItem", null);
-      return;
-    }
-
-    const topBuffer = this.get("viewport-top-offset");
-    const topIndex  = this.findTopView(items, topBuffer, 0, items.length - 1) || items.length - 1;
-    const top       = items[topIndex];
-    const view      = this.container.lookup("-view-registry:main")[top.id];
-    const content   = view && view.get("content");
-
-    if (this.get("topItem") !== content) {
-      this.sendAction("top-item-changed", content);
-    }
-
-    this.set("topItem", content);
-  },
-
-  /**
-    Binary search for finding the topmost view on screen.
-    @method findTopView
-    @param {Array} childViews the childViews to search through
-    @param {Number} windowTop The top of the viewport to search against
-    @param {Number} min The minimum index to search through of the child views
-    @param {Number} max The max index to search through of the child views
-    @returns {Number} the index into childViews of the topmost view
-  **/
-  findTopView: function(childViews, viewportTop, min, max) {
-    if (max < min) { return min; }
-
-    while(max>min){
-      const mid = Math.floor((min + max) / 2);
-      // in case of not full-window scrolling
-      const $view      = Ember.$(childViews[mid]);
-      const viewBottom = $view.position().top + $view.height();
-
-      if (viewBottom > viewportTop) {
-        max = mid-1;
-      } else {
-        min = mid+1;
-      }
-    }
-
-    return min;
   },
 
   restoreScrollPosition: function(item, originalOffset) {
@@ -226,7 +169,7 @@ export default Ember.Component.extend({
     if (container) {
       return this.$().closest(container);
     } else {
-      return Ember.$(window);
+      return this.$();
     }
   }),
 
@@ -235,18 +178,13 @@ export default Ember.Component.extend({
     this.scrollHandler = function scrollHandler() {
       Ember.run.debounce(_this, 'scrolled', 10);
     };
+    this.get("scrollContainer").on("touchmove scroll", this.scrollHandler);
 
-    this.checkOverscrollHandler = function checkOverscrollHandler(e) {
-      _this.checkOverscroll(e);
-    };
-
-    Ember.on("touchmove scroll", this.scrollHandler, this.get("scrollContainer"));
     if (this.get("prevent-overscroll")) {
-      Ember.on(
-        "DOMMouseScroll mousewheel",
-        this.checkOverscrollHandler,
-        this.get("scrollContainer")
-      );
+      this.checkOverscrollHandler = function checkOverscrollHandler(e) {
+        _this.checkOverscroll(e);
+      };
+      this.get("scrollContainer").on("DOMMouseScroll mousewheel", this.checkOverscrollHandler);
     }
   }),
 
