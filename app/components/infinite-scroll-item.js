@@ -1,6 +1,2 @@
-import Ember from 'ember';
-
-export default Ember.Component.extend({
-  classNames: ["infinite-scroll__item"],
-  content: null
-});
+import InfiniteScrollItem from 'mb-infinite-scroll/components/infinite-scroll-item';
+export default InfiniteScrollItem;
