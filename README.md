@@ -1,6 +1,6 @@
 # mb-infinite-scroll
 
-WiP
+Use [Smoke and Mirrors](https://github.com/runspired/smoke-and-mirrors) instead, this is just a stopgap while that isn't working on Ember 2.0 and I don't intend to maintain it.
 
 ## Installation
 
