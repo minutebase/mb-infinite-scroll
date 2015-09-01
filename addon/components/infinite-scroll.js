@@ -87,6 +87,10 @@ export default Ember.Component.extend({
   },
 
   restoreScrollPosition: function(item, originalOffset) {
+    if (this.get("_state") !== "inDOM") {
+      return;
+    }
+
     if (!item || !item.length) {
       return;
     }
@@ -107,17 +111,18 @@ export default Ember.Component.extend({
   loadPrevious() {
     this.set("isLoadingPrev", true);
 
-    const _this = this;
     const defer = new Ember.RSVP.defer();
 
     const topmostItem = this.items().first();
     const offset      = topmostItem.offset().top;
 
-    defer.promise.then(function() {
-      Ember.run.scheduleOnce("afterRender", _this, _this.restoreScrollPosition, topmostItem, offset);
-      Ember.run.scheduleOnce("afterRender", _this, _this.scrolled); // trigger a scroll to see if we need more content to fill
-    }).finally(function() {
-      _this.set("isLoadingPrev", false);
+    defer.promise.then(() => {
+      Ember.run.scheduleOnce("afterRender", this, this.restoreScrollPosition, topmostItem, offset);
+      Ember.run.scheduleOnce("afterRender", this, this.scrolled); // trigger a scroll to see if we need more content to fill
+    }).finally(() => {
+      if (this.get("_state") === "inDOM") {
+        this.set("isLoadingPrev", false);
+      }
     });
 
     this.sendAction("onLoadPrev", defer);
@@ -126,13 +131,14 @@ export default Ember.Component.extend({
   loadNext() {
     this.set("isLoadingNext", true);
 
-    const _this = this;
     const defer = new Ember.RSVP.defer();
 
-    defer.promise.then(function(){
-      Ember.run.scheduleOnce("afterRender", _this, _this.scrolled); // trigger a scroll to see if we need more content to fill
-    }).finally(function() {
-      _this.set("isLoadingNext", false);
+    defer.promise.then(() => {
+      Ember.run.scheduleOnce("afterRender", this, this.scrolled); // trigger a scroll to see if we need more content to fill
+    }).finally(() => {
+      if (this.get("_state") === "inDOM") {
+        this.set("isLoadingNext", false);
+      }
     });
 
     this.sendAction("onLoadNext", defer);
