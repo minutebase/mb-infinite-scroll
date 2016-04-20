@@ -1,8 +1,6 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  classNames: "infinite-scroll",
-
   isLoadingNext: false,
   isLoadingPrev: false,
   isLoading: Ember.computed.or("isLoadingNext", "isLoadingPrev"),
@@ -17,14 +15,32 @@ export default Ember.Component.extend({
   "viewport-top-offset": 0,
 
   // by default assume there's always more to load if actions are bound
-  canScrollUp:   Ember.computed.notEmpty("onLoadPrev"),
-  canScrollDown: Ember.computed.notEmpty("onLoadNext"),
-
-  itemClass: "infinite-scroll__item",
+  canScrollUp:   Ember.computed.notEmpty("on-load-prev"),
+  canScrollDown: Ember.computed.notEmpty("on-load-next"),
 
   scrollBuffer:       50,
   topScrollBuffer:    null,
   bottomScrollBuffer: null,
+
+  scrollContainer: Ember.computed("scroll-container", function() {
+    const container = this.get("scroll-container");
+    if (container) {
+      return this.$().closest(container);
+    } else {
+      return this.$();
+    }
+  }),
+
+  didInsertElement() {
+    this._super(...arguments);
+    this.setupBuffersAndScrollToTop();
+    this.setupScrollHandler();
+  },
+
+  willDestroyElement() {
+    this._super(...arguments);
+    this.removeScrollHandler();
+  },
 
   setBuffer(direction, height) {
     this.$(`.infinite-scroll__buffer--${direction}`).css({ height });
@@ -40,7 +56,7 @@ export default Ember.Component.extend({
     }
   },
 
-  setupBuffersAndScrollToTop: Ember.on("didInsertElement", function() {
+  setupBuffersAndScrollToTop() {
     Ember.run.schedule("afterRender", this, () => {
       const buffer = this.get("scrollBuffer");
 
@@ -51,7 +67,7 @@ export default Ember.Component.extend({
       // otherwise the buffers haven't been added yet
       Ember.run.schedule("afterRender", this, "scrollToTop");
     });
-  }),
+  },
 
   scrollToTop() {
     if (this.get("_state") !== "inDOM") {
@@ -104,19 +120,14 @@ export default Ember.Component.extend({
     $container.scrollTop(newScroll);
   },
 
-  items() {
-    return this.$("."+this.get("itemClass"));
-  },
-
   loadPrevious() {
     this.set("isLoadingPrev", true);
 
-    const defer = new Ember.RSVP.defer();
-
-    const topmostItem = this.items().first();
+    // topmost item is the first item after the buffer
+    const topmostItem = this.$(".infinite-scroll__buffer--top").next();
     const offset      = topmostItem.offset().top;
 
-    defer.promise.then(() => {
+    this.get("on-load-prev")().then(() => {
       Ember.run.scheduleOnce("afterRender", this, this.restoreScrollPosition, topmostItem, offset);
       Ember.run.scheduleOnce("afterRender", this, this.scrolled); // trigger a scroll to see if we need more content to fill
     }).finally(() => {
@@ -124,24 +135,18 @@ export default Ember.Component.extend({
         this.set("isLoadingPrev", false);
       }
     });
-
-    this.sendAction("onLoadPrev", defer);
   },
 
   loadNext() {
     this.set("isLoadingNext", true);
 
-    const defer = new Ember.RSVP.defer();
-
-    defer.promise.then(() => {
+    this.get("on-load-next")().then(() => {
       Ember.run.scheduleOnce("afterRender", this, this.scrolled); // trigger a scroll to see if we need more content to fill
     }).finally(() => {
       if (this.get("_state") === "inDOM") {
         this.set("isLoadingNext", false);
       }
     });
-
-    this.sendAction("onLoadNext", defer);
   },
 
   cancelScroll(e) {
@@ -170,16 +175,7 @@ export default Ember.Component.extend({
     }
   },
 
-  scrollContainer: Ember.computed("scroll-container", function() {
-    const container = this.get("scroll-container");
-    if (container) {
-      return this.$().closest(container);
-    } else {
-      return this.$();
-    }
-  }),
-
-  setupScrollHandler: Ember.on("didInsertElement", function() {
+  setupScrollHandler() {
     const _this = this;
     this.scrollHandler = function scrollHandler() {
       Ember.run.debounce(_this, 'scrolled', 10);
@@ -192,13 +188,13 @@ export default Ember.Component.extend({
       };
       this.get("scrollContainer").on("DOMMouseScroll mousewheel", this.checkOverscrollHandler);
     }
-  }),
+  },
 
-  removeScrollHandler: Ember.on("willDestroyElement", function() {
+  removeScrollHandler() {
     this.get("scrollContainer").off("touchmove scroll", this.scrollHandler);
     if (this.get("prevent-overscroll")) {
       this.get("scrollContainer").off("DOMMouseScroll mousewheel", this.checkOverscrollHandler);
     }
-  })
+  }
 
 });

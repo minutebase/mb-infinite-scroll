@@ -2,15 +2,12 @@ html, body {
   margin: 20px;
 }
 
-.infinite-scroll {
+.infinite-scroll__list {
   border: 1px solid #CCC;
   height: 500px;
   width: 300px;
   margin-bottom: 20px;
   overflow: auto;
-}
-
-.infinite-scroll__list {
   padding: 0;
   margin: 0;
   list-style-type: none;

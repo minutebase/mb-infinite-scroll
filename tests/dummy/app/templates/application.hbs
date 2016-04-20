@@ -1,35 +1,18 @@
 <h2>Ember Infinite Scroll</h2>
 
 <div class="example">
-  <h3>Bidirectional</h3>
-
   {{#infinite-scroll
-    onLoadNext="loadNextBidirectional"
-    onLoadPrev="loadPrevBidirectional"
-    isLoadingPrev=isLoadingPrev
-    isLoadingNext=isLoadingNext
-    itemClass="infinite-scroll__item"
+    on-load-next=(action "loadNextBidirectional")
+    on-load-prev=(action "loadPrevBidirectional")
+    tagName="ul"
+    class="infinite-scroll__list"
   }}
 
-    {{#if isLoadingPrev}}
-      <div class="infinite-scroll__loading-indicator">
-        Loading Previous Items
-      </div>
-    {{/if}}
-
-    <ul class="infinite-scroll__list">
-      {{#each bidirectionalItems as |item|}}
-        <li class="infinite-scroll__item">
-          {{item.title}}
-        </li>
-      {{/each}}
-    </ul>
-
-    {{#if isLoadingNext}}
-      <div class="infinite-scroll__loading-indicator">
-        Loading Next Items
-      </div>
-    {{/if}}
+    {{#each bidirectionalItems as |item|}}
+      <li class="infinite-scroll__item">
+        {{item.title}}
+      </li>
+    {{/each}}
 
   {{/infinite-scroll}}
 </div>
